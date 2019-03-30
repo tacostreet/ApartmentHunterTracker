@@ -5,6 +5,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from sqlalchemy import create_engine
 import psycopg2 
 import io
+import os
 
 def df_import():
     '''Imports "Active Ads" sheets from the Houston Master Apartment google sheet. Returns a list of lists of lists (in other words, a list of 2D arrays which contain the contents of each sheet)'''
@@ -57,13 +58,13 @@ def df_export(data, table_name):
     '''Takes a single dataframe object and a desired SQL table name. Truncates the contents of the table on the attached Heroku database and replaces them with the contents of the dataframe.'''
     engine = create_engine(os.environ.get('DATABASE_URL', default))
     #Truncate/Clear the table if it exists
-    df.head(0).to_sql(table_name, engine, if_exists='replace',index=False)
+    data.head(0).to_sql(table_name, engine, if_exists='replace',index=False)
     
     #Fast data import using artifical cursor
     conn = engine.raw_connection()
     cur = conn.cursor()
     output = io.StringIO()
-    df.to_csv(output, sep='\t', header=False, index=False)
+    data.to_csv(output, sep='\t', header=False, index=False)
     output.seek(0)
     contents = output.getvalue()
     cur.copy_from(output, table_name, null="") # null values become ''
@@ -93,7 +94,7 @@ def df_main():
     for s in sheets:
         df = pd.DataFrame(s)
         # Set the first row of the spreadsheet as the column headers. 
-        # Label unlabeled Aolumn A, and drop duplicate columns.
+        # Label unlabeled Column A, and drop duplicate columns.
         df[0][0] = 'Apartment Type'
         df.columns = df.iloc[0]
         df = df.loc[:,~df.columns.duplicated()]
@@ -115,9 +116,11 @@ def df_main():
         
         sheet_data.append(df)
         
-    # Concatanate dataframes from each google sheet and export
+    # Concatanate dataframes from each google sheet
     final_data = pd.concat(sheet_data, axis=0, ignore_index=True)
+
+    # Insert 'id' column to play nice with Django
+    final_data.insert(loc=0,column='id',value=list(range(1,len(final_data.index)+1)))
+
     df_export(final_data, 'houston_listings')
     #df_test_export(final_data, 'houston_listings')
-
-
