@@ -1,0 +1,58 @@
+<table>
+<tr>
+  <th>apt</th>
+  <th>ad_code</th>
+  <th>ads_link</th>
+  <th>apartment_type</th>
+  <th>building_address</th>
+  <th>building_complex</th>
+  <th>cl</th>
+  <th>cl_0</th>
+  <th>contact_name</th>
+  <th>email</th>
+  <th>postal_code</th>
+  <th>rlx</th>
+  <th>ry</th>
+  <th>rent</th>
+  <th>specific_locations</th>
+  <th>zil</th>
+  <th>zu</th>
+  <th>available_on</th>
+  <th>bathrooms</th>
+  <th>bedrooms</th>
+  <th>housing_type</th>
+  <th>laundry</th>
+  <th>parking</th>
+  <th>phone_number</th>
+  <th>posting_title</th>
+</tr>
+{% for b in obj %}
+<tr>
+  <td>{{ b.apt }}</td>
+  <td>{{ b.ad_code }}</td>
+  <td>{{ b.ads_link }}</td>
+  <td>{{ b.apartment_type }}</td>
+  <td>{{ b.building_address }}</td>
+  <td>{{ b.building_complex }}</td>
+  <td>{{ b.cl }}</td>
+  <td>{{ b.cl_0 }}</td>
+  <td>{{ b.contact_name }}</td>
+  <td>{{ b.email }}</td>
+  <td>{{ b.postal_code }}</td>
+  <td>{{ b.rlx }}</td>
+  <td>{{ b.ry }}</td>
+  <td>{{ b.rent }}</td>
+  <td>{{ b.specific_locations }}</td>
+  <td>{{ b.zil }}</td>
+  <td>{{ b.zu }}</td>
+  <td>{{ b.available_on }}</td>
+  <td>{{ b.bathrooms }}</td>
+  <td>{{ b.bedrooms }}</td>
+  <td>{{ b.housing_type }}</td>
+  <td>{{ b.laundry }}</td>
+  <td>{{ b.parking }}</td>
+  <td>{{ b.phone_number }}</td>
+  <td>{{ b.posting_title }}</td>
+</tr>
+{% endfor %}
+</table>
