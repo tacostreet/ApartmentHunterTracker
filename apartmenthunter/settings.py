@@ -13,9 +13,9 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 
 # Parse database configuration from $DATABASE_URL
-# import dj_database_url
-# db_from_env = dj_database_url.config(conn_max_age=500, require_ssl=True)
-# DATABASES['default'].update(db_from_env)
+import dj_database_url
+db_from_env = dj_database_url.config(conn_max_age=500, require_ssl=True)
+DATABASES['default'].update(db_from_env)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -81,16 +81,18 @@ WSGI_APPLICATION = 'apartmenthunter.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'apartment-hunter-tracker',
-        'USER': 'postgres',
-        'PASSWORD': 'admin',
-        'HOST': '',
-        'PORT': '5432',
-    }
-}
+#DATABASES['default'] =  dj_database_url.config()
+
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.postgresql',
+#        'NAME': 'apartment-hunter-tracker',
+#        'USER': 'postgres',
+#        'PASSWORD': 'admin',
+#        'HOST': '',
+#        'PORT': '5432',
+#    }
+#}
 
 
 # Password validation
@@ -129,4 +131,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = "/static/"
+
+django_heroku.settings(locals())
