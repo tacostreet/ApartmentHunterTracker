@@ -10,6 +10,9 @@ gunicorn = "*"
 psycopg2 = "*"
 whitenoise = "*"
 django_heroku = "*"
+django-leaflet = "*"
+django-geojson = "*"
+geopy = "*"
 
 [dev-packages]
 
