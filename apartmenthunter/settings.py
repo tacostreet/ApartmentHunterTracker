@@ -44,8 +44,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'leaflet',
+    'djgeojson', 
+    
     'apartmenthunter',
-    'dbdisplay',
+    'db_page',
+    'map_page',
 ]
 
 MIDDLEWARE = [
