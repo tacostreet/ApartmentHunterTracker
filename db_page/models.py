@@ -18,7 +18,7 @@ class HoustonListings(models.Model):
     ry = models.TextField(db_column='RY', blank=True, null=True)  # Field name made lowercase.
     rent = models.TextField(db_column='Rent', blank=True, null=True)  # Field name made lowercase.
     specific_locations = models.TextField(db_column='Specific Locations', blank=True, null=True)  # Field name made lowercase. Field renamed to remove unsuitable characters.
-    zil = models.TextField(db_column='ZIL', blank=True, null=True)  # Field name made lowercase.
+    #zil = models.TextField(db_column='ZIL', blank=True, null=True)  # Field name made lowercase.
     zu = models.TextField(db_column='ZU', blank=True, null=True)  # Field name made lowercase.
     available_on = models.TextField(db_column='available on', blank=True, null=True)  # Field renamed to remove unsuitable characters.
     bathrooms = models.TextField(blank=True, null=True)

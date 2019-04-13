@@ -5,7 +5,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 from sqlalchemy import create_engine
 import psycopg2 
 import io
-import os
 
 def df_import():
     '''Imports "Active Ads" sheets from the Houston Master Apartment google sheet. Returns a list of lists of lists (in other words, a list of 2D arrays which contain the contents of each sheet)'''
@@ -36,18 +35,20 @@ def df_convertloc(data):
     address = ''
     # List of standard entries in the dataframe's first columns. Includes common typos and potential typos: any un-included typo will result in complete malformation of the dataset.
     valid_types = ['1BR', '1 BR', '2BR', '2 BR', '3BR','3 BR', '4BR','4 BR', '5BR','5 BR', 'Studio']
-    first = True
+    count = 0
     
     for index, row in data.iterrows():
         if row['Apartment Type'] not in valid_types:
-            if first:
-                # Alex's first header cell typically contains the name of the building, complex, or development the apartment is located in...
-                building = row['Apartment Type']
-                first = False
-            else:
-                # Alex's second header cell contains the name address of the aparment's location
+            # Entries that represent a building's address all have commas in them (before denoting the city names)
+            # Building titles/names do not, at least, not in any of these entries
+            if ',' in str(row['Apartment Type']):
                 address = row['Apartment Type']
-                first = True
+            else:
+                building = row['Apartment Type']
+            if count <= 2:
+                count += 1
+            else:
+                count = 0
         else:
             # If the value is a standard entry, than it is part of the previously declared set. Label it accordingly.
             new_columns['Building/Complex'][index] = building
@@ -58,13 +59,13 @@ def df_export(data, table_name):
     '''Takes a single dataframe object and a desired SQL table name. Truncates the contents of the table on the attached Heroku database and replaces them with the contents of the dataframe.'''
     engine = create_engine(os.environ.get('DATABASE_URL', default))
     #Truncate/Clear the table if it exists
-    data.head(0).to_sql(table_name, engine, if_exists='replace',index=False)
+    df.head(0).to_sql(table_name, engine, if_exists='replace',index=False)
     
     #Fast data import using artifical cursor
     conn = engine.raw_connection()
     cur = conn.cursor()
     output = io.StringIO()
-    data.to_csv(output, sep='\t', header=False, index=False)
+    df.to_csv(output, sep='\t', header=False, index=False)
     output.seek(0)
     contents = output.getvalue()
     cur.copy_from(output, table_name, null="") # null values become ''
@@ -72,7 +73,7 @@ def df_export(data, table_name):
     
 def df_test_export(data, table_name):
     '''As df_export, but attaches to the Heroku database via direct link rather than environment variable. WARNING: LINK ADDRESS WILL CHANGE OVER TIME; this function is meant for testing putposes only, or when not operating within the Heroku environment.'''
-    engine = create_engine('postgresql://xaaqozeqikgbkr:65cfd905b68bce05b836746c07886c03a74bfc4b919dee528ed9d8fa09c60d63@ec2-107-22-189-136.compute-1.amazonaws.com:5432/dlb0l5a96o19e')
+    engine = create_engine('postgres://xaaqozeqikgbkr:65cfd905b68bce05b836746c07886c03a74bfc4b919dee528ed9d8fa09c60d63@ec2-107-22-189-136.compute-1.amazonaws.com:5432/dlb0l5a96o19e')
     #Truncate/Clear the table if it exists
     data.head(0).to_sql(table_name, engine, if_exists='replace',index=False)
     
@@ -94,7 +95,7 @@ def df_main():
     for s in sheets:
         df = pd.DataFrame(s)
         # Set the first row of the spreadsheet as the column headers. 
-        # Label unlabeled Column A, and drop duplicate columns.
+        # Label unlabeled Aolumn A, and drop duplicate columns.
         df[0][0] = 'Apartment Type'
         df.columns = df.iloc[0]
         df = df.loc[:,~df.columns.duplicated()]
@@ -116,11 +117,13 @@ def df_main():
         
         sheet_data.append(df)
         
-    # Concatanate dataframes from each google sheet
+    # Concatanate dataframes from each google sheet and export
     final_data = pd.concat(sheet_data, axis=0, ignore_index=True)
-
+    
     # Insert 'id' column to play nice with Django
     final_data.insert(loc=0,column='id',value=list(range(1,len(final_data.index)+1)))
-
+    
     df_export(final_data, 'houston_listings')
     #df_test_export(final_data, 'houston_listings')
+    #return final_data
+
